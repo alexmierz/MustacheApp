@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSCameraUsageDescription</key>
+	<string>$(EXECUTABLE_NAME) need access to your camera to apply the mustache filter and provide an augmented reality experience.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>we need it</string>
+	<key>Privacy - ARKit Face Tracking Usage Description</key>
+	<string>We use ARKit for face tracking to apply the mustache filter to your face in real-time.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>NEED IT</string>
+</dict>
+</plist>
