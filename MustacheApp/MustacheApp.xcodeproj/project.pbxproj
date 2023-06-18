@@ -16,7 +16,7 @@
 		9B9F76982A340C0E00B0ED4C /* MustacheAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9F76972A340C0E00B0ED4C /* MustacheAppUITestsLaunchTests.swift */; };
 		9BE41B982A3BCA330027E480 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 9BE41B972A3BCA330027E480 /* Realm */; };
 		9BE41B9A2A3BCA330027E480 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 9BE41B992A3BCA330027E480 /* RealmSwift */; };
-		9BE41B9C2A3BCA840027E480 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE41B9B2A3BCA840027E480 /* RecordingView.swift */; };
+		9BE41BA82A3E9AB90027E480 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 9BE41BA72A3E9AB90027E480 /* SQLite */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,7 +48,8 @@
 		9B9F76952A340C0E00B0ED4C /* MustacheAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MustacheAppUITests.swift; sourceTree = "<group>"; };
 		9B9F76972A340C0E00B0ED4C /* MustacheAppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MustacheAppUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		9B9F76A42A340ED100B0ED4C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		9BE41B9B2A3BCA840027E480 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
+		9BE41BA42A3E9A800027E480 /* libsqlite3.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.0.tbd; path = usr/lib/libsqlite3.0.tbd; sourceTree = SDKROOT; };
+		9BE41BA52A3E9A8C0027E480 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BE41BA82A3E9AB90027E480 /* SQLite in Frameworks */,
 				9BE41B9A2A3BCA330027E480 /* RealmSwift in Frameworks */,
 				9BE41B982A3BCA330027E480 /* Realm in Frameworks */,
 			);
@@ -85,6 +87,7 @@
 				9B9F768A2A340C0E00B0ED4C /* MustacheAppTests */,
 				9B9F76942A340C0E00B0ED4C /* MustacheAppUITests */,
 				9B9F76782A340C0D00B0ED4C /* Products */,
+				9BE41BA32A3E9A800027E480 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -104,7 +107,6 @@
 				9B9F76A42A340ED100B0ED4C /* Info.plist */,
 				9B9F767A2A340C0D00B0ED4C /* MustacheAppApp.swift */,
 				9B9F767C2A340C0D00B0ED4C /* ContentView.swift */,
-				9BE41B9B2A3BCA840027E480 /* RecordingView.swift */,
 				9B9F767E2A340C0E00B0ED4C /* Assets.xcassets */,
 				9B9F76802A340C0E00B0ED4C /* Preview Content */,
 			);
@@ -136,6 +138,15 @@
 			path = MustacheAppUITests;
 			sourceTree = "<group>";
 		};
+		9BE41BA32A3E9A800027E480 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9BE41BA52A3E9A8C0027E480 /* libsqlite3.tbd */,
+				9BE41BA42A3E9A800027E480 /* libsqlite3.0.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -155,6 +166,7 @@
 			packageProductDependencies = (
 				9BE41B972A3BCA330027E480 /* Realm */,
 				9BE41B992A3BCA330027E480 /* RealmSwift */,
+				9BE41BA72A3E9AB90027E480 /* SQLite */,
 			);
 			productName = MustacheApp;
 			productReference = 9B9F76772A340C0D00B0ED4C /* MustacheApp.app */;
@@ -230,6 +242,7 @@
 			mainGroup = 9B9F766E2A340C0D00B0ED4C;
 			packageReferences = (
 				9BE41B962A3BCA330027E480 /* XCRemoteSwiftPackageReference "realm-swift" */,
+				9BE41BA62A3E9AB90027E480 /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 			);
 			productRefGroup = 9B9F76782A340C0D00B0ED4C /* Products */;
 			projectDirPath = "";
@@ -274,7 +287,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B9F767D2A340C0D00B0ED4C /* ContentView.swift in Sources */,
-				9BE41B9C2A3BCA840027E480 /* RecordingView.swift in Sources */,
 				9B9F767B2A340C0D00B0ED4C /* MustacheAppApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -612,6 +624,14 @@
 				kind = branch;
 			};
 		};
+		9BE41BA62A3E9AB90027E480 /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.14.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -624,6 +644,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9BE41B962A3BCA330027E480 /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		9BE41BA72A3E9AB90027E480 /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BE41BA62A3E9AB90027E480 /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -6,20 +6,151 @@
 //
 
 
-
 import SwiftUI
 import ARKit
-import Realm
-import RealmSwift
+import ReplayKit
+import AVKit
+import SQLite
 
-struct ContentView: UIViewRepresentable {
+class ScreenRecordingDelegate: NSObject, RPPreviewViewControllerDelegate {
+    weak var presentationContext: UIViewController?
+
+    func previewControllerDidFinish(_ previewController: RPPreviewViewController) {
+        previewController.dismiss(animated: true) {
+            if let playerViewController = previewController as? AVPlayerViewController,
+               let videoURL = playerViewController.player?.currentItem?.asset as? AVURLAsset {
+                // Save video to camera roll
+                UISaveVideoAtPathToSavedPhotosAlbum(videoURL.url.path, nil, nil, nil)
+                
+                // Save video URL to SQLite database
+                self.saveVideoURLToDatabase(videoURL: videoURL.url)
+            }
+            self.presentationContext?.dismiss(animated: true)
+        }
+    }
+    
+    func saveVideoURLToDatabase(videoURL: URL) {
+        // SQLite database path
+        let dbPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
+        let databasePath = dbPath.appending("/videos.db")
+        
+        do {
+            // Connect to SQLite database
+            let db = try Connection(databasePath)
+            
+            // Create videos table if it doesn't exist
+            let videosTable = Table("videos")
+            let id = Expression<Int64>("id")
+            let url = Expression<String>("url")
+            let createTableQuery = videosTable.create(ifNotExists: true) { table in
+                table.column(id, primaryKey: .autoincrement)
+                table.column(url)
+            }
+            try db.run(createTableQuery)
+            
+            // Insert video URL into videos table
+            let insertQuery = videosTable.insert(url <- videoURL.absoluteString)
+            try db.run(insertQuery)
+        } catch {
+            print("Error saving video URL to database: \(error)")
+        }
+    }
+}
+
+struct ContentView: SwiftUI.View {
+    @State private var isRecording = false
+    let delegate = ScreenRecordingDelegate()
+    @State private var showLibrary = false
+    
+    var body: some SwiftUI.View {
+        ZStack {
+            ARFaceView()
+                .ignoresSafeArea()
+            
+            VStack {
+                Spacer()
+                Button(action: {
+                    if isRecording {
+                        stopRecording()
+                    } else {
+                        startRecording()
+                    }
+                    isRecording.toggle()
+                }) {
+                    Text(isRecording ? "Stop Recording" : "Start Recording")
+                        .padding()
+                        .background(isRecording ? Color.red : Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+            }
+            
+            
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        showLibrary = true
+                    }) {
+                        Image(systemName: "square.grid.2x2")
+                            .foregroundColor(.white)
+                            .font(.system(size: 24))
+                            .padding()
+                    }
+                }
+                Spacer()
+            }
+        }
+        .onAppear {
+            delegate.presentationContext = UIApplication.shared.windows.first?.rootViewController
+        }
+        .sheet(isPresented: $showLibrary) {
+            
+            LibraryGridView()
+        }
+    }
+
+    private func startRecording() {
+        let recorder = RPScreenRecorder.shared()
+        guard recorder.isAvailable else {
+            print("Screen recording is not available.")
+            return
+        }
+
+        recorder.isMicrophoneEnabled = true // Enable microphone audio recording
+
+        recorder.startRecording { error in
+            if let error = error {
+                print("Recording failed to start: \(error.localizedDescription)")
+            } else {
+                print("Recording started.")
+            }
+            isRecording = true
+        }
+    }
+
+    private func stopRecording() {
+        let recorder = RPScreenRecorder.shared()
+        recorder.stopRecording { [self] previewViewController, error in
+            if let error = error {
+                print("Recording failed to stop: \(error.localizedDescription)")
+            } else if let previewViewController = previewViewController {
+                previewViewController.previewControllerDelegate = delegate
+                delegate.presentationContext?.present(previewViewController, animated: true, completion: nil)
+            }
+            isRecording = false
+        }
+    }
+}
+
+struct ARFaceView: UIViewRepresentable {
     func makeUIView(context: Context) -> ARSCNView {
         let sceneView = ARSCNView()
         sceneView.delegate = context.coordinator
         let configuration = ARFaceTrackingConfiguration()
         sceneView.session.run(configuration)
         
-        // Enable user interaction and add tap gesture recognizer
+        //Tap through mustaches
         let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
         sceneView.addGestureRecognizer(tapGesture)
         sceneView.isUserInteractionEnabled = true
@@ -73,7 +204,7 @@ struct ContentView: UIViewRepresentable {
         }
         
         func updateFeatures(for node: SCNNode?, using anchor: ARFaceAnchor) {
-            print(featureIndices)
+            //print(featureIndices)
             for (feature, indices) in zip(features, featureIndices) {
                 let child = node?.childNode(withName: feature, recursively: false) as? FaceNode
                 let vertices = indices.map { SCNVector3(anchor.geometry.vertices[$0]) }
@@ -83,6 +214,64 @@ struct ContentView: UIViewRepresentable {
         
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             faceNode?.next()
+        }
+    }
+}
+
+struct LibraryGridView: SwiftUI.View {
+    @State private var videos: [URL] = []
+    
+    var body: some SwiftUI.View {
+        ScrollView {
+            VStack {
+                Text("Video Library")
+                    .font(.title)
+                    .padding()
+                
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))]) {
+                    ForEach(videos, id: \.self) { videoURL in
+                        VideoItemView(videoURL: videoURL)
+                    }
+                }
+                .padding()
+            }
+        }
+        .onAppear {
+            fetchVideosFromDatabase()
+        }
+    }
+    
+    private func fetchVideosFromDatabase() {
+        // Fetch videos from SQLite database and update
+        let urls: [URL] = []
+        
+        DispatchQueue.main.async {
+            videos = urls
+        }
+    }
+}
+
+
+
+struct VideoItemView: SwiftUI.View {
+    var videoURL: URL
+    
+    var body: some SwiftUI.View {
+        VStack {
+            Text("Video")
+                .font(.headline)
+            
+            // Attempted display of video thumbnail
+            Image(systemName: "film")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 120, height: 120)
+            
+            // Attempted display of video name
+            Text(videoURL.lastPathComponent)
+                .font(.caption)
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
     }
 }
@@ -131,9 +320,6 @@ class FaceNode: SCNNode {
         
         if let plane = geometry as? SCNPlane {
             plane.firstMaterial?.diffuse.contents = UIImage(named: options[index])
-            plane.firstMaterial?.isDoubleSided = true
         }
     }
 }
-
-
